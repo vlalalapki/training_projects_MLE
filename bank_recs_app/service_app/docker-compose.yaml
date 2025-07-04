@@ -1,0 +1,41 @@
+services:
+  recs-app:
+    env_file:
+      - .env
+
+    build:
+      dockerfile: Dockerfile
+      
+    ports:
+      - "${MAIN_PORT}:${MAIN_PORT}"
+
+    volumes:
+      - type: bind
+        source: ./recs
+        target: /service_app/recs
+
+    hostname: ${FASTAPI_HOST}
+
+  prometheus:
+    image: prom/prometheus
+    
+    command:
+      - "--config.file=/service_app/prometheus/prometheus.yml"
+    
+    ports:
+      - "${PROM_PORT}:${PROM_PORT}"
+
+    volumes:
+      - "./prometheus/prometheus.yml:/service_app/prometheus/prometheus.yml"
+
+    hostname: prometheus
+
+  grafana:
+    image: grafana/grafana
+    env_file:
+      - .env
+    ports:
+      - "${GRAF_PORT}:${GRAF_PORT}"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASS}

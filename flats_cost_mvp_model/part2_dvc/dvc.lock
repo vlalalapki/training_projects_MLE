@@ -1,0 +1,66 @@
+schema: '2.0'
+stages:
+  get_data:
+    cmd: python scripts/get_data.py
+    deps:
+    - path: scripts/get_data.py
+      hash: md5
+      md5: c2ae80063cc91cf5476a7d8ed3b754e2
+      size: 1010
+    params:
+      params.yaml:
+        index_col: id
+    outs:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 793c688c2e7228d96e8905e76d0c21ee
+      size: 12031712
+      cloud:
+        my_storage:
+          etag: 793c688c2e7228d96e8905e76d0c21ee
+          version_id: 00061D75E1407BC7
+  fit_model:
+    cmd: python scripts/fit.py
+    deps:
+    - path: data/initial_data.csv
+      hash: md5
+      md5: 793c688c2e7228d96e8905e76d0c21ee
+      size: 12031712
+    - path: scripts/fit.py
+      hash: md5
+      md5: 01765fd6c2cfe1409b651b99a465d90d
+      size: 1376
+    params:
+      params.yaml:
+        loss_function: RMSE
+        one_hot_drop: if_binary
+        target_col: target
+    outs:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: 4ef6f14c8df7e4b7cf77946e4ebb3771
+      size: 751988
+  evaluate_model:
+    cmd: python scripts/evaluate.py
+    deps:
+    - path: models/fitted_model.pkl
+      hash: md5
+      md5: 4ef6f14c8df7e4b7cf77946e4ebb3771
+      size: 751988
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: 6672537dd6c44b9bf4d314cec8e48efa
+      size: 1050
+    params:
+      params.yaml:
+        metrics:
+        - neg_mean_squared_error
+        - neg_mean_absolute_percentage_error
+        n_jobs: -1
+        n_splits: 5
+        target_col: target
+    outs:
+    - path: cv_results/cv_res.json
+      hash: md5
+      md5: b369e3ffa7d18225303a5acbb57533ea
+      size: 144
